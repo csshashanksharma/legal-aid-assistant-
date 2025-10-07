@@ -1,6 +1,7 @@
 from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
 import whisper
+from preprocessing import preprocess_for_retrieval, detect_language
 
 app = FastAPI()
 
@@ -12,7 +13,15 @@ class Query(BaseModel):
 
 @app.post("/query/")
 def get_query(user_query: Query):
-    return {"received_query": user_query.text}
+    cleaned, normalized = preprocess_for_retrieval(user_query.text)
+    lang = detect_language(user_query.text)
+    return {
+        "original_text": user_query.text,
+        "cleaned_text": cleaned,
+        "normalized_text": normalized,
+        "language": lang
+    }
+
 
 @app.post("/voice/")
 async def voice_input(file: UploadFile = File(...)):
@@ -21,13 +30,23 @@ async def voice_input(file: UploadFile = File(...)):
         with open(audio_path, "wb") as buffer:
             buffer.write(await file.read())
 
-        # Debug: print the saved file path
-        print(f"Saved file: {audio_path}")
-
         # Transcribe
         result = model.transcribe(audio_path)
-        return {"transcribed_text": result["text"]}
+        transcribed_text = result["text"]
+
+        # Preprocess transcribed text
+        cleaned, normalized = preprocess_for_retrieval(transcribed_text)
+        lang = detect_language(transcribed_text)
+
+        return {
+            "original_text": transcribed_text,
+            "cleaned_text": cleaned,
+            "normalized_text": normalized,
+            "language": lang
+        }
+
     except Exception as e:
         import traceback
         traceback.print_exc()
         return {"error": str(e)}
+
