@@ -2,3 +2,8 @@ fastapi
 uvicorn
 pydantic
 openai-whisper
+langdetect
+spacy
+datasets
+sentence-transformers
+faiss-cpu
