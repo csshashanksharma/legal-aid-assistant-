@@ -10,3 +10,4 @@ Thumbs.db
 # IDE files
 .vscode/
 
+vector_store/
