@@ -10,4 +10,5 @@ Thumbs.db
 # IDE files
 .vscode/
 
-vector_store/
+capstone_project/vector_store/
+.env/
